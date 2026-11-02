@@ -792,13 +792,7 @@ jobs:
           cd "$GITHUB_WORKSPACE/kernel_workspace/android-kernel"
           f="drivers/kernelsu/selinux/inode.c"
           if [ -f "$f" ] && ! grep -q "define selinux_inode" "$f"; then
-            python3 - "$f" <<'PY'
-import sys
-p=sys.argv[1]
-s=open(p).read()
-s=s.replace('#include "klog.h"\n', '#include "klog.h"\n\n#ifndef selinux_inode\n#define selinux_inode(i) ((struct inode_security_struct *)(i)->i_security)\n#endif\n')
-open(p,'w').write(s)
-PY
+            python3 -c "p='$f'; s=open(p).read(); s=s.replace(chr(35)+'include \"klog.h\"\n', chr(35)+'include \"klog.h\"\n\n#ifndef selinux_inode\n#define selinux_inode(i) ((struct inode_security_struct *)(i)->i_security)\n#endif\n'); open(p,'w').write(s)"
             echo "[OK] selinux_inode macro added"
           fi
 

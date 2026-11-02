@@ -785,6 +785,23 @@ jobs:
                               with open(rfile, "w") as f: f.write(rcontent)
                               print(f"[OK] {rfile} içine reboot(0xdeadbeef, 0xcafebabe) kancası yerleştirildi!")
 
+      - name: Fix selinux_inode macro (4.14)
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$GITHUB_WORKSPACE/kernel_workspace/android-kernel"
+          f="drivers/kernelsu/selinux/inode.c"
+          if [ -f "$f" ] && ! grep -q "define selinux_inode" "$f"; then
+            python3 - "$f" <<'PY'
+import sys
+p=sys.argv[1]
+s=open(p).read()
+s=s.replace('#include "klog.h"\n', '#include "klog.h"\n\n#ifndef selinux_inode\n#define selinux_inode(i) ((struct inode_security_struct *)(i)->i_security)\n#endif\n')
+open(p,'w').write(s)
+PY
+            echo "[OK] selinux_inode macro added"
+          fi
+
       - name: Setup Configuration
         shell: bash
         run: |

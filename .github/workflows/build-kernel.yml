@@ -826,6 +826,9 @@ jobs:
             echo "CONFIG_KSU_SUSFS_OPEN_REDIRECT=y"
           } >> "$DEFCONFIG_FILE"
 
+          # Custom kernel name
+          sed -i 's/^CONFIG_LOCALVERSION=.*/CONFIG_LOCALVERSION="-perf-mochibunr"/' "$DEFCONFIG_FILE"
+
           make ARCH=arm64 O=out "${DEVICE}_defconfig"
 
           ./scripts/config --file out/.config --disable CONFIG_CC_STACKPROTECTOR_STRONG
@@ -851,6 +854,7 @@ jobs:
             CLANG_TRIPLE=aarch64-linux-gnu- \
             CROSS_COMPILE=aarch64-linux-gnu- \
             CROSS_COMPILE_ARM32=arm-linux-gnueabi- \
+            LOCALVERSION=-mochibunr \
             KCFLAGS="-Wno-typedef-redefinition -Wno-declaration-after-statement" \
             Image
 
